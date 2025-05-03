@@ -1,0 +1,2 @@
+brew install golang-migrate
+migrate create --ext sql --dir . --seq init_schema

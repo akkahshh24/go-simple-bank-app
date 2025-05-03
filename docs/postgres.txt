@@ -1,0 +1,23 @@
+# Pull postgres docker image
+docker pull postgres:17-alpine
+
+# Run postgres docker container
+docker run --name postgres17 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres:17-alpine
+
+# Execute into the postgres docker container and run psql
+docker exec -it postgres17 psql -U root
+
+# Execute into the postgres docker container into the sh shell
+docker exec -it postgres17 /bin/sh
+
+# create simple_bank database inside the container
+createdb --username=root --owner=root simple_bank
+
+# single command to do both
+docker exec -it postgres17 createdb --username=root --owner=root simple_bank
+
+# execute into the simple_bank database
+docker exec -it postgres17 psql -U root simple_bank
+
+# delete the database
+dropdb simple_bank
