@@ -25,7 +25,7 @@ CREATE INDEX ON "transactions" ("to_account_id");
 
 CREATE INDEX ON "transactions" ("from_account_id", "to_account_id");
 
-COMMENT ON COLUMN "transactions"."type" IS 'credit or debit';
+COMMENT ON COLUMN "transactions"."type" IS 'UPI, IMPS, NEFT, RTGS';
 
 ALTER TABLE "transactions" ADD FOREIGN KEY ("from_account_id") REFERENCES "accounts" ("id");
 

@@ -28,7 +28,7 @@ func TestUpdateAccount(t *testing.T) {
 
 	arg := UpdateAccountParams{
 		ID:      createdAccount.ID,
-		Balance: util.RandomBalance(10000, 100000),
+		Balance: util.RandomAmount(10000, 100000),
 	}
 	updatedAccount, err := testQueries.UpdateAccount(ctx, arg)
 	require.NoError(t, err)
@@ -50,6 +50,8 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
+	ctx := context.Background()
+
 	// Create multiple random accounts
 	for i := 0; i < 10; i++ {
 		createRandomAccount(t)
@@ -59,8 +61,6 @@ func TestListAccounts(t *testing.T) {
 		Limit:  5,
 		Offset: 5,
 	}
-
-	ctx := context.Background()
 	accounts, err := testQueries.ListAccounts(ctx, arg)
 	require.NoError(t, err)
 	require.Len(t, accounts, 5)
@@ -74,7 +74,7 @@ func createRandomAccount(t *testing.T) Account {
 	ctx := context.Background()
 	arg := CreateAccountParams{
 		HolderName: util.RandomHolderName(),
-		Balance:    util.RandomBalance(10000, 100000),
+		Balance:    util.RandomAmount(10000, 100000),
 		Currency:   util.RandomCurrency(),
 	}
 
