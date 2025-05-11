@@ -1,6 +1,5 @@
 Table accounts as A {
   id int [pk, increment]
-  number varchar(20) [unique, not null]
   holder_name text [not null]
   balance numeric(20,2) [not null, default: 0.00]
   currency char(3) [not null, default: 'INR']

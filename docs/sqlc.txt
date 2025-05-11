@@ -1,0 +1,5 @@
+# Install sqlc
+brew install sqlc
+
+# Generate SQL code
+sqlc generate
