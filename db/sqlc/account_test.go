@@ -9,6 +9,29 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func createRandomAccount(t *testing.T) Account {
+	ctx := context.Background()
+	arg := CreateAccountParams{
+		Owner:    util.RandomName(),
+		Balance:  util.RandomAmount(10000, 100000),
+		Currency: util.RandomCurrency(),
+	}
+
+	account, err := testStore.CreateAccount(ctx, arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, account)
+
+	require.Equal(t, arg.Owner, account.Owner)
+	require.Equal(t, arg.Balance, account.Balance)
+	require.Equal(t, arg.Currency, account.Currency)
+
+	require.NotZero(t, account.ID)
+	require.NotZero(t, account.CreatedAt)
+	require.NotZero(t, account.UpdatedAt)
+
+	return account
+}
+
 func TestCreateAccount(t *testing.T) {
 	createRandomAccount(t)
 }
@@ -16,7 +39,7 @@ func TestCreateAccount(t *testing.T) {
 func TestGetAccount(t *testing.T) {
 	ctx := context.Background()
 	createdAccount := createRandomAccount(t)
-	gotAccount, err := testQueries.GetAccount(ctx, createdAccount.ID)
+	gotAccount, err := testStore.GetAccount(ctx, createdAccount.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, gotAccount)
 	require.Equal(t, createdAccount, gotAccount)
@@ -30,7 +53,7 @@ func TestUpdateAccount(t *testing.T) {
 		ID:      createdAccount.ID,
 		Balance: util.RandomAmount(10000, 100000),
 	}
-	updatedAccount, err := testQueries.UpdateAccount(ctx, arg)
+	updatedAccount, err := testStore.UpdateAccount(ctx, arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedAccount)
 	require.Equal(t, createdAccount.ID, updatedAccount.ID)
@@ -40,10 +63,10 @@ func TestUpdateAccount(t *testing.T) {
 func TestDeleteAccount(t *testing.T) {
 	ctx := context.Background()
 	createdAccount := createRandomAccount(t)
-	err := testQueries.DeleteAccount(ctx, createdAccount.ID)
+	err := testStore.DeleteAccount(ctx, createdAccount.ID)
 	require.NoError(t, err)
 
-	deletedAccount, err := testQueries.GetAccount(ctx, createdAccount.ID)
+	deletedAccount, err := testStore.GetAccount(ctx, createdAccount.ID)
 	require.Error(t, err)
 	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, deletedAccount)
@@ -61,34 +84,11 @@ func TestListAccounts(t *testing.T) {
 		Limit:  5,
 		Offset: 5,
 	}
-	accounts, err := testQueries.ListAccounts(ctx, arg)
+	accounts, err := testStore.ListAccounts(ctx, arg)
 	require.NoError(t, err)
 	require.Len(t, accounts, 5)
 
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
 	}
-}
-
-func createRandomAccount(t *testing.T) Account {
-	ctx := context.Background()
-	arg := CreateAccountParams{
-		HolderName: util.RandomHolderName(),
-		Balance:    util.RandomAmount(10000, 100000),
-		Currency:   util.RandomCurrency(),
-	}
-
-	account, err := testQueries.CreateAccount(ctx, arg)
-	require.NoError(t, err)
-	require.NotEmpty(t, account)
-
-	require.Equal(t, arg.HolderName, account.HolderName)
-	require.Equal(t, arg.Balance, account.Balance)
-	require.Equal(t, arg.Currency, account.Currency)
-
-	require.NotZero(t, account.ID)
-	require.NotZero(t, account.CreatedAt)
-	require.NotZero(t, account.UpdatedAt)
-
-	return account
 }

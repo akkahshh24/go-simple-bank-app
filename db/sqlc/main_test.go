@@ -6,15 +6,18 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
 	connString = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
 )
 
-// We need a Queries object to test the methods implemented in the sqlc generated code.
-var testQueries *Queries
+// testStore is a global variable that holds the Store instance for testing.
+// It is initialized in the TestMain function and used in the test cases.
+// This allows us to share the same Store instance across multiple tests,
+// which can help reduce setup time and improve test performance.
+var testStore *Store
 
 // TestMain is the entry point for the test suite. It sets up the test environment
 // and runs the tests.
@@ -22,19 +25,18 @@ var testQueries *Queries
 // It is typically used to set up any necessary resources, such as database connections,
 // configuration, or test data.
 func TestMain(m *testing.M) {
-	ctx := context.Background()
-
 	// We can even use pgxpool.Pool to create a connection pool.
 	// It automatically manages the connections for us, it's thread-safe and ideal for concurrent requests.
 	// However, for simplicity, we are using pgx.Connect here.
 	// conn, err := pgxpool.Connect(ctx, connString)
-	conn, err := pgx.Connect(ctx, connString)
+	var err error
+	connPool, err := pgxpool.New(context.Background(), connString)
 	if err != nil {
 		log.Fatal("error while connecting to the db:", err)
 	}
-	defer conn.Close(ctx)
+	defer connPool.Close()
 
-	testQueries = New(conn)
+	testStore = NewStore(connPool)
 
 	// m.Run() is a function that runs the tests in the current package.
 	// It returns an integer exit code, which is typically 0 for success and 1 for failure.

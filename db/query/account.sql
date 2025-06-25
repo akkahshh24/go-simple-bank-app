@@ -1,6 +1,6 @@
 -- name: CreateAccount :one
 INSERT INTO accounts (
-  holder_name, balance, currency
+  owner, balance, currency
 ) VALUES (
   $1, $2, $3
 )
@@ -13,12 +13,12 @@ WHERE id = $1 LIMIT 1;
 -- name: ListAccounts :many
 SELECT * FROM accounts
 ORDER BY id
-LIMIT $1 
+LIMIT $1
 OFFSET $2;
 
 -- name: UpdateAccount :one
 UPDATE accounts
-set balance = $2
+SET balance = $2
 WHERE id = $1
 RETURNING *;
 

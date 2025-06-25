@@ -9,21 +9,25 @@ import (
 )
 
 type Account struct {
-	ID         int32              `json:"id"`
-	HolderName string             `json:"holder_name"`
-	Balance    pgtype.Numeric     `json:"balance"`
-	Currency   string             `json:"currency"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	ID        int64              `json:"id"`
+	Owner     string             `json:"owner"`
+	Balance   pgtype.Numeric     `json:"balance"`
+	Currency  string             `json:"currency"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
-type Transaction struct {
-	ID            int32 `json:"id"`
-	FromAccountID int32 `json:"from_account_id"`
-	ToAccountID   int32 `json:"to_account_id"`
-	// credit or debit
-	Type        string             `json:"type"`
-	Amount      pgtype.Numeric     `json:"amount"`
-	Description pgtype.Text        `json:"description"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+type Entry struct {
+	ID        int64              `json:"id"`
+	AccountID pgtype.Int8        `json:"account_id"`
+	Amount    pgtype.Numeric     `json:"amount"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type Transfer struct {
+	ID            int64              `json:"id"`
+	FromAccountID pgtype.Int8        `json:"from_account_id"`
+	ToAccountID   pgtype.Int8        `json:"to_account_id"`
+	Amount        pgtype.Numeric     `json:"amount"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }

@@ -1,14 +1,22 @@
 version: "2"
 sql:
-  - engine: "postgresql"
-    queries: "./db/query/"
-    schema: "./db/migration/"
-    gen:
-      go:
-        package: "db"
-        out: "./db/sqlc"
-        sql_package: "pgx/v5"
-        emit_json_tags: true
-        emit_prepared_queries: false
-        emit_interface: false
-        emit_exact_table_names: false
+- engine: "postgresql"
+  schema: "db/migration"
+  queries: "db/query"
+  gen:
+    go:
+      package: "db"
+      out: "db/sqlc"
+      sql_package: "pgx/v5"
+      emit_json_tags: true
+      emit_interface: false
+      emit_empty_slices: true
+      # overrides:
+      # - db_type: "timestamptz"
+      #   go_type: "time.Time"
+      # - db_type: "bigint"
+      #   go_type: "int64"
+      # - db_type: "numeric"
+      #   go_type: 
+      #     import: "github.com/shopspring/decimal"
+      #     type: "Decimal"
