@@ -10,14 +10,15 @@ import (
 )
 
 func createRandomAccount(t *testing.T) Account {
-	ctx := context.Background()
+	user := createRandomUser(t)
+
 	arg := CreateAccountParams{
-		Owner:    util.RandomName(),
+		Owner:    user.Username,
 		Balance:  util.RandomAmount(10000, 100000),
 		Currency: util.RandomCurrency(),
 	}
 
-	account, err := testStore.CreateAccount(ctx, arg)
+	account, err := testStore.CreateAccount(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, account)
 
@@ -73,22 +74,23 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
-	ctx := context.Background()
-
-	// Create multiple random accounts
+	var lastAccount Account
 	for i := 0; i < 10; i++ {
-		createRandomAccount(t)
+		lastAccount = createRandomAccount(t)
 	}
 
 	arg := ListAccountsParams{
+		Owner:  lastAccount.Owner,
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
-	accounts, err := testStore.ListAccounts(ctx, arg)
+
+	accounts, err := testStore.ListAccounts(context.Background(), arg)
 	require.NoError(t, err)
-	require.Len(t, accounts, 5)
+	require.NotEmpty(t, accounts)
 
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
+		require.Equal(t, lastAccount.Owner, account.Owner)
 	}
 }

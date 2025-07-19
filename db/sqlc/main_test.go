@@ -6,18 +6,15 @@ import (
 	"os"
 	"testing"
 
+	"github.com/akkahshh24/go-simple-bank-app/util"
 	"github.com/jackc/pgx/v5/pgxpool"
-)
-
-const (
-	connString = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
 )
 
 // testStore is a global variable that holds the Store instance for testing.
 // It is initialized in the TestMain function and used in the test cases.
 // This allows us to share the same Store instance across multiple tests,
 // which can help reduce setup time and improve test performance.
-var testStore *Store
+var testStore Store
 
 // TestMain is the entry point for the test suite. It sets up the test environment
 // and runs the tests.
@@ -25,12 +22,12 @@ var testStore *Store
 // It is typically used to set up any necessary resources, such as database connections,
 // configuration, or test data.
 func TestMain(m *testing.M) {
-	// We can even use pgxpool.Pool to create a connection pool.
-	// It automatically manages the connections for us, it's thread-safe and ideal for concurrent requests.
-	// However, for simplicity, we are using pgx.Connect here.
-	// conn, err := pgxpool.Connect(ctx, connString)
-	var err error
-	connPool, err := pgxpool.New(context.Background(), connString)
+	config, err := util.LoadConfig("../..")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
 		log.Fatal("error while connecting to the db:", err)
 	}

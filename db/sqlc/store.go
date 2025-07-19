@@ -4,16 +4,21 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Store provides all functions to execute SQL queries and transaction
-type Store struct {
-	*Queries // compose the queries struct to extend the functionality
-	connPool *pgxpool.Pool
+// Store defines all functions to execute db queries and transactions
+type Store interface {
+	Querier
 }
 
-// NewStore creates a new Store
-func NewStore(connPool *pgxpool.Pool) *Store {
-	return &Store{
-		Queries:  New(connPool),
+// SQLStore provides all functions to execute SQL queries and transactions
+type SQLStore struct {
+	connPool *pgxpool.Pool
+	*Queries
+}
+
+// NewStore creates a new store
+func NewStore(connPool *pgxpool.Pool) Store {
+	return &SQLStore{
 		connPool: connPool,
+		Queries:  New(connPool),
 	}
 }
