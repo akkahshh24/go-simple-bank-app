@@ -26,34 +26,69 @@ type loginUserResponse struct {
 }
 
 func (server *Server) loginUser(ctx *gin.Context) {
+	// Bind the request to the loginUserRequest struct
 	var req loginUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	// Check if the user exists and verify the password
 	user, err := server.store.GetUser(ctx, req.Username)
 	if err != nil {
+		// If the user is not found, return a not found error
 		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
+		// If there's another error, return an internal server error
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
+	// Verify the password
 	err = util.CheckPassword(req.Password, user.HashedPassword)
 	if err != nil {
+		// If the password is incorrect, return an unauthorized error
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
+	// Create access token
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(
 		user.Username,
 		user.Role,
 		server.config.AccessTokenDuration,
 		token.TokenTypeAccessToken,
 	)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// Create a refresh token
+	refreshToken, refreshPayload, err := server.tokenMaker.CreateToken(
+		user.Username,
+		user.Role,
+		server.config.RefreshTokenDuration,
+		token.TokenTypeRefreshToken,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// Create a session for the user
+	arg := db.CreateSessionParams{
+		ID:           refreshPayload.ID,
+		Username:     user.Username,
+		RefreshToken: refreshToken,
+		UserAgent:    ctx.Request.UserAgent(),
+		ClientIp:     ctx.ClientIP(),
+		IsBlocked:    false,
+		ExpiresAt:    refreshPayload.ExpiredAt,
+	}
+	session, err := server.store.CreateSession(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

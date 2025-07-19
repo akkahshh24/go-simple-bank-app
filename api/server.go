@@ -49,6 +49,7 @@ func (server *Server) Start(address string) error {
 func (s *Server) setupRouter() {
 	s.router.POST("/users", s.createUser)
 	s.router.POST("/users/login", s.loginUser)
+	s.router.POST("/tokens/renew_access", s.renewAccessToken)
 
 	authRoutes := s.router.Group("/").Use(authMiddleware(s.tokenMaker))
 	authRoutes.POST("/accounts", s.createAccount)

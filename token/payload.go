@@ -33,6 +33,7 @@ func NewPayload(username string, role string, duration time.Duration, tokenType 
 		return nil, err
 	}
 
+	// Username and role are included in the payload for identification
 	payload := &Payload{
 		ID:        tokenID,
 		Type:      tokenType,
@@ -46,9 +47,12 @@ func NewPayload(username string, role string, duration time.Duration, tokenType 
 
 // Valid checks if the token payload is valid or not
 func (payload *Payload) Valid(tokenType TokenType) error {
+	// Check if the token type matches the expected type
 	if payload.Type != tokenType {
 		return ErrInvalidToken
 	}
+
+	// Check if the token has expired
 	if time.Now().After(payload.ExpiredAt) {
 		return ErrExpiredToken
 	}
